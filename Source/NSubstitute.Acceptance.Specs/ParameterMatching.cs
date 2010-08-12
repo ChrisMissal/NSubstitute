@@ -101,7 +101,6 @@ namespace NSubstitute.Acceptance.Specs
         }
 
         [Test]
-        [Pending]
         public void Resolve_setter_arg_matcher_with_more_specific_type_than_member_signature()
         {
             const string value = "some string";

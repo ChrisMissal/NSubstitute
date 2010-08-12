@@ -29,7 +29,7 @@ namespace NSubstitute.Core
                 if (haveArgumentSpec)
                 {
                     var argumentSpec = argumentSpecs[argumentSpecIndex];
-                    if (parameterTypes[i] == argumentSpec.ForType)
+                    if (parameterTypes[i].IsAssignableFrom(argumentSpec.ForType))
                     {
                         if (Object.Equals(arguments[i], GetDefaultValue(parameterTypes[i])))
                         {
@@ -38,7 +38,7 @@ namespace NSubstitute.Core
                         }
                     }
                 }
-                    
+
             }
 
             return result;
@@ -50,16 +50,17 @@ namespace NSubstitute.Core
             foreach (var type in distinctTypes)
             {
                 var defaultValue = GetDefaultValue(type);
-                var numberOfArgumentSpecsForType = argumentSpecs.Count(x => x.ForType == type);
-                if (numberOfArgumentSpecsForType > 0)
+                var numberOfArgumentsWithDefaultValueForType =
+                    arguments.Where((x, index) => parameterTypes[index] == type && Object.Equals(x, defaultValue)).Count();
+                if (numberOfArgumentsWithDefaultValueForType == 0) continue;
+
+                var numberOfArgumentSpecsForType = argumentSpecs.Count(x => type.IsAssignableFrom(x.ForType));
+                if (numberOfArgumentSpecsForType == 0) continue;
+
+                if (numberOfArgumentSpecsForType != numberOfArgumentsWithDefaultValueForType)
                 {
-                    var numberOfArgumentsWithDefaultValueForType =
-                        arguments.Where((x, index) => parameterTypes[index] == type && Object.Equals(x, defaultValue)).Count();
-                    if (numberOfArgumentSpecsForType != numberOfArgumentsWithDefaultValueForType)
-                    {
-                        throw new AmbiguousArgumentsException(
-                            "Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.");
-                    }
+                    throw new AmbiguousArgumentsException(
+                        "Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.");
                 }
             }
         }
